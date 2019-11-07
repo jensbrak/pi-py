@@ -4,7 +4,8 @@
 
 Simple Python script to update external IP for dynamic dns but only when IP has changed and only by checking router via SSH.
 
-** Dependencies **
+# Dependencies
+
 Software dependencies
 
 1.  Python (https://www.python.org/)
@@ -12,7 +13,7 @@ Software dependencies
 3.  Paramiko (https://www.paramiko.org/) - needed by Fabric)
 4.  Fabric (http://www.fabfile.org/) - needed by pippy for SSH
   
-** Other dependendies**
+# Other dependendies
 
 1.  A script or url for updating the external IP for the dynamic dns provider used
 2.  A router with SSH access enabled
