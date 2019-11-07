@@ -6,21 +6,21 @@ Simple Python script to update external IP for dynamic dns but only when IP has 
 
 # Dependencies
 
-** Software dependencies **
+**Software dependencies**
 
 1.  Python (https://www.python.org/)
 2.  Invoke (https://www.pyinvoke.org/) - needed by Fabric)
 3.  Paramiko (https://www.paramiko.org/) - needed by Fabric)
 4.  Fabric (http://www.fabfile.org/) - needed by pippy for SSH
   
-** Other dependendies **
+**Other dependendies**
 
 1.  A script or url for updating the external IP for the dynamic dns provider used
 2.  A router with SSH access enabled
 3.  A linux system to run pippy from 
  
 # Installation
-** NOTE: If you don't know or understand the dependencies for this script, you should not use it. :) **
+**NOTE: If you don't know or understand the dependencies for this script, you should not use it. :)**
 
 1.  If missing - install the dependencies for pippy, 
 2.  Download pippy script and place it in a folder where it should be run (eg /usr/bin/, /usr/local/bin/ or ~/bin/)
@@ -61,7 +61,7 @@ The only "magic" pippy does is to use predefined libs to SSH into a router.
 
 # NOTES
 
-*  ** IMPORTANT **: Make sure you ONLY use this in a settig where you can protect your router credentials. If pippy.json can be read by others, you will expose your router admin credentials.
+*  **IMPORTANT**: Make sure you ONLY use this in a settig where you can protect your router credentials. If pippy.json can be read by others, you will expose your router admin credentials.
 *  If your router does not support SSH, you're out of luck here. Or modify the script to parse an external page that will show IP.
 *  If you choose to log everything (settings file option 'changeonly' set to false), the log WILL grow. Use logrotate or something, or you will produce large logfiles with rather meaningless contents that will fill your disk.
-*  ** IMPORTANT **: Use at own risk. No support, no guarantees. I made it to fit my purposes, you are free to make it yours but that's up to you. :)  
+*  **IMPORTANT**: Use at own risk. No support, no guarantees. I made it to fit my purposes, you are free to make it yours but that's up to you. :)  
