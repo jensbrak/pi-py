@@ -1,0 +1,170 @@
+#!/usr/bin/env python3
+
+# ##############################################################################
+# ### System dependencies
+import sys
+import json
+import subprocess
+import datetime
+
+# ##############################################################################
+# ### Logging and message printing
+
+# ### info(txt, lvl): print message 'txt' with extra string 'lvl' (of provided)
+# ### where 'lvl' indicates loglevel 
+def info(txt, lvl=""):
+    msg = "[pip"
+    if lvl != "":
+        msg += " " + lvl
+    msg += "] " + txt
+    print(msg)
+
+# ### fail(txt, halt): print error message 'txt' indicating failure, where
+# ### 'halt' set to True will force the script to terminate promply
+def fail(txt, halt=True):
+    info(txt, "ERROR")
+    if halt:
+        info("terminating!", "ERROR")
+        exit(1)
+
+# ### dbg(txt): print debug messafe 'txt' to help debugging, but only if
+# ### global setting 'debug' is set to True (read from settings file)
+def dbg(txt):
+    if debug:
+        info(txt, "DEBUG")
+
+# ### log(txt): log message 'txt' to file, where full path to file is set by
+# ### global setting 'logfile' (read from settings file)
+def log(txt):
+    if logfile != "":
+        dbg("Logging to: " + logfile + ", text: " + txt)
+        ts = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+        msg = ts + ": " + txt + "\n"
+        try:
+            with open(logfile, "a") as file:
+                file.write(msg)
+        except Exception as e:
+            fail("Failed to write logifle: " + logfile + ", reason: " + str(e), halt=False)
+    else:
+        dbg("Not logged (empty logfile path): , text: " + txt)
+
+# ##############################################################################
+# ### Global variables from settings file
+# ### Note: settingspath is the only path set in this file, rest in "pippy.json"
+
+#settingspath = "." # Debugging: use file in same dir
+settingspath = "/etc/pippy" 
+pippysettings = settingspath + "/" + "pippy.json"
+try:
+    with open(pippysettings) as settingsfile:
+        settings = json.load(settingsfile)
+    server = settings['server']
+    port = settings['port']
+    user = settings['user']
+    password = settings['password']
+    interface = settings['interface']
+    savedipfile = settings['savedipfile']
+    action = settings['action']
+    logfile = settings['logfile']
+    debug = settings['debug']
+    changeonly = settings['changeonly']
+    dbg("Settings file loaded: " + pippysettings + " = " + str(settings))
+except Exception as e:
+    fail("Could not read settings file: " + pippysettings + ", reason: " + str(e))
+        
+# ##############################################################################
+# ### IP change functions
+
+# ### onipchanged(): called when IP change occur. Calls whatever action the
+# ### global variable 'action' (read from settings file) is set to.
+# ### Note: if 'action' starts with "http" the action is assumed to be a
+# ### page/script accessable on the web and is called as such. Result code will
+# ### be HTTP result, ie 200 for ok
+# ### If 'action' does NOT start with "http" it is assumed to be a shell command
+# ### and will be called using a spawned shell process. Result code will be a
+# ### code from the shell, ie 0 for success
+def onipchanged():
+    if action.startswith("http"):
+        from urllib import request
+        result = request.urlopen(action)
+        code = str(result.getcode())
+        dbg("URL action returned code: " + code)
+    else:
+        args = action.split(" ")
+        result = subprocess.run(args)
+        code = str(result.returncode)
+        dbg("CMD action returned code: " + code)
+
+    return code
+        
+# ### getipexternal(): called to get external IP, using host/port/user/password
+# ### global settings (read from settings file) to connect using SSH
+# ### Current implementation repend on Fabric for high level SSH connection
+# ### and assume target host (a router) support ssh with commands ifconfig, grep,
+# ### awk and sed available to get external IP. The IP obtained is returned.
+# ### Note: A different implementation could be calling an external page to get
+# ### the IP. Current implementation avoid going outside the local net, ie is not
+# ### dependent on an internet connection (however, if no internet connection
+# ### exist the router will return non-existing external IP
+def getipexternal():
+    from fabric import Connection
+    ssh = Connection(
+        host=server,
+        port=str(port),
+        user=user,
+        connect_kwargs={"password": password}
+   )
+
+    cmd = "ifconfig " + interface + " | grep inet | awk '{print $2}' | sed 's/[^0-9.]*//g'"
+    dbg("getipexternal: sending cmd=" + cmd)
+    result = ssh.run(cmd, hide=True)
+
+    dbg("getipexternal: got result=" + str(result.exited))
+    return result.stdout.strip()
+
+# ### setipsaved(ip): save 'ip' to file. If save file does not exist, create it
+def setipsaved(ip):
+    with open(savedipfile, "w") as file:
+        file.write(ip)
+    dbg("setipsaved: " + ip)
+
+# ### getipsaved(): read saved IP and return it. If save file does not exist
+# ### try creating it with setsavedip() using '0.0.0.0' as IP, forcing a call
+# ### to 'action' since IP will be considered to have changed (first time use)
+def getipsaved():
+    try:
+        with open(savedipfile) as file:
+            ipold = file.read()
+    except IOError:
+        dbg("getipsaved: file not found: " + savedipfile)
+        ipold = "0.0.0.0"
+        setipsaved(ipold)
+    dbg("getipsaved: " + ipold)
+    return ipold
+
+# ##############################################################################
+# ### Main function
+# ### Get old IP, get new IP, act if IP has changed
+# ### Note: if external IP is empty, it indicates internet is unreachable
+# ### If so, no action will be called until internet is reachable again (ie
+# ### IP changed from empty to a non empty IP)
+def pipmain():
+    ipold = getipsaved()
+    ipnew = getipexternal()
+    if ipold != ipnew:
+        msg = "ip changed: '" + ipold + "' -> '" + ipnew + "'"
+        log(msg)
+        setipsaved(ipnew)
+        if ipnew != "":
+            result = onipchanged()
+            msg = "action returned: '" + result + "'"
+        else:
+            msg = "internet unreachable, no action called"
+        log(msg)
+    else:
+        if changeonly:
+            dbg("ip unchanged: '" + ipnew + "', no logging done")
+        else:
+            log("ip unchanged: '" + ipnew + "'")
+
+pipmain()
