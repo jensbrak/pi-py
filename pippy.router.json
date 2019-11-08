@@ -3,9 +3,9 @@
     "port": 22,
     "user": "admin",
     "password": "password",
-    "interface": "eth0",
+    "matchip": "ifconfig eth0 | grep inet | awk '{print $2}' | sed 's/[^0-9.]*//g'",
     "savedipfile": "./pippy.save",
-    "action": "echo IP changed",
+    "action": "!!! echo IP changed !!!",
     "logfile": "./pippy.log",
     "debug": true,
     "changeonly": false
