@@ -2,7 +2,7 @@
 
 **pippy: Public IP PYthon-script**
 
-Simple Python script to update external IP for dynamic dns but only when IP has changed and only by checking router via SSH.
+Simple Python script to update external IP for dynamic dns but only when IP has changed and only by checking router via SSH or using external web page.
 
 # Dependencies
 
@@ -16,51 +16,95 @@ Simple Python script to update external IP for dynamic dns but only when IP has 
 **Other dependendies**
 
 1.  A script or url for updating the external IP for the dynamic dns provider used
-2.  A router with SSH access enabled
+2.  A router with SSH access enabled OR an external IP providing site
 3.  A linux system to run pippy from 
- 
+
 # Installation
-**NOTE: If you don't know or understand the dependencies for this script, you should not use it. :)**
+**NOTE: Make sure you understand the script somewhat before using it**
 
 1.  If missing - install the dependencies for pippy, 
 2.  Download pippy script and place it in a folder where it should be run (eg /usr/bin/, /usr/local/bin/ or ~/bin/)
-3.  Make sure pippy has proper flags set (eg chmod 755 pippy)
-4.  Download pippy.json and place it in a folder of choice (eg /etc/ or ~/.pippy/) and update pippy variable 'settingspath' to point to this folder
-5.  Edit pippy.json to suit your router and dynamic dns provider (see Desciption below for details)
-6.  Make sure the paths pointed out in pippy.json is accessable and directories exists (see Description below for details).
-7.  Test the script by calling it directly, until it works as desired (eg ./pippy) Tips: remove file "pippy.save" to simulate IP change
-8.  Add row to crontab to run the script as often as desired (see crontab on the web for instructions)
+3.  Make sure pippy has proper permissions set (eg chmod 755 pippy) 
+4.  Download pippy.router.json or pippy.externalpage.json (depnding on what kind of provider you choose to use) and place it in a folder of choice (eg /etc/ or ~/.pippy/) 
+5.  Edit selected .json file to suit your selected provider (see Desciption below for details)
+6.  Make sure the paths pointed out in .json file is accessable and directories exists (see Description below for details).
+7.  Make sure path pointed out in pippy for .json is accessible and directories exists (see Description below for details).
+8.  Test the script by calling it directly, until it works as desired (eg ./pippy) Hint: remove file "pippy.save" to simulate IP change
+9.  Add row to crontab to run the script as often as desired (see crontab on the web for instructions)
 
 # Description
-pippy is pretty basic: it will load settings from a json file, use them to connect via SSH to a router pointed out in settings, using the credentials given. 
-Using the SSH connection, the external IP is read using some console commands (ifconfig, grep, awk, sed). The interface is a parameter in settings too (eg eth0)
-If the external IP has changed since last call, the action pointed out in settings is called.
+pippy is pretty basic: it will load settings from a json file and based on the settings use a provider to get external IP. 
+If IP has changed since last check, an action is performed - once again as defined in settings.
 
-Details of the different settings in pippy.json and how they work:
+Details of the different settings in pippy.*.json and how they work:
 
-`
-*  server (string): local IP for the router to use
-*  port (int): SSH port to router
-*  user (string): username for admin of router
-*  password (string): password for admin of router
-*  interface (string): name of interface that will give external IP using ifconfig (eth0 for the one I used)
-*  savedipfile (string): full path (including filename) to file that will store last IP retrieved (note: all directories must exist, but file will be automatically created)
-*  action (string): full URI to web page/script to call for dyndns update OR command to use in console (eg call script locally to do dynds update). See section 'Action' for details
-*  logfile (string): full path (including filename) to file that will be used for logging (note: all directories must exist, but file will be automatically created)
-*  debug (boolean): true if debug print should be used, false otherwise. Intended to be used when setting things up
-*  changeonly (boolean): true if only changes of IP should be logged (recommended), false if checks with no change should be logged as well
-`
+**server**
+`string: URI including 'http' OR an IP address`
 
-# Action
-The key component for actually updating a dyndns provider with new IP is NOT covered here. I use afraid.org and it provides a personal URI pointing to a script that will update afraid.org to know my new IP. You should create your own one and use.
+If `server` starts with `'http'` pippy will try to get external IP from is an external web page. 
+Assumption is that an IP is presented on that page representing external IP.
 
-The way pippy checks how 'action' should be called is utterly simple: if the action setting begin with 'http' it is assumed to be an URI and it will load the URI as a web page, ignoring the result but returning the HTTP code.
-If the action does not start with 'http', it is assumed the action is a local script, ie a fully qualified name of the script to call when IP change occur.
+If `server` does not start with `'http'` pippy will try to get external IP from a router. 
+Assumption is that the setting is a local IP that points to a SSH enabled router from which to get the external IP from.
 
-The only "magic" pippy does is to use predefined libs to SSH into a router.
+**action**
+`int: SSH port to router`
+
+Port to use for SSH connection (usually 22)
+Only relevant if `server` is a router with SSH.
+
+**user**
+`string: username for SSH`
+
+The username for the admin of the router.
+Only relevant if `server` is a router with SSH.
+
+**password**
+`string: password for SSH`
+
+The password for the admin of the router.
+Only relevant if `server` is a router with SSH.
+
+**matchip**
+`string: regexp for IP match OR shell command(s) for getting IP`
+
+If `server`is a web page, pippy will use `matchip` as a regexp to parse the web page for external IP.
+Assumption is that `matchip` is a valid AND double quoted (double backslash) regexp.
+
+If `server`is a router with SSH, pippy will use `matchip` as a command (possibly using pipes) to ask router for external IP.
+Assumption is that `matchip` is a valid command or series of commands supported by the router using SSH connection.
+
+**action**
+`string: URI including 'http' OR a valid shell command`
+
+If `action` starts with `'http'` pippy will call the web page given by `action` as a result of a change of external IP.
+
+If `action`does not start with `'http'` pippy will run the comand given by `action` in a local shell as a result of a change of external IP.
+
+Assumption is that `action` is whatever is needed to actually update the dyndns provider with a new external IP.
+In other words: he key component for actually updating a dyndns provider with new IP is NOT covered here. 
+
+**logfile**
+`string: fully qualified path to logfile`
+
+pippy will write IP changes to this file.
+If file is missing it will be created, but missing directories is not handled and will cause error.
+
+**changeonly**
+`bool: if IP changes shall be logged only` 
+
+What to log: 
+If `true`: only IP changes shall be logged in `logfile`
+If `false`: even checks with no change shall be logged in `logfile` (not recommended)
+
+**debug**
+`bool: if debug messages shall be printed
+
+What to print:
+If `true`: print debugg info to stdout (will not be printed in `logfile`)
+If `false`: don't print debug info (nothing will be printed part from logging to `logfile` or whatever `action` as console command will print)
 
 # NOTES
-
 *  **IMPORTANT**: Make sure you ONLY use this in a settig where you can protect your router credentials. If pippy.json can be read by others, you will expose your router admin credentials.
 *  If your router does not support SSH, you're out of luck here. Or modify the script to parse an external page that will show IP.
 *  If you choose to log everything (settings file option 'changeonly' set to false), the log WILL grow. Use logrotate or something, or you will produce large logfiles with rather meaningless contents that will fill your disk.
