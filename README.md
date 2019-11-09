@@ -19,6 +19,15 @@ Simple Python script to update external IP for dynamic dns but only when IP has 
 2.  A router with SSH access enabled OR an external IP providing site
 3.  A linux system to run pippy from 
 
+# Tested on / works on
+
+Works with Free DNS on my Raspian (Linux) and ASUS RT-AC86U. 
+
+However any router with SSH-support should work, as long as you can deduce shell commands to get public IP.
+Moreover - any linux should work too and most likely any OS that can run Python and the Python libs used. 
+
+Let me know if you try using it and I'll update it. I also have a Linux daemon version in the works too, if crontab is too low resolution for you.
+
 # Installation
 **NOTE: Make sure you understand the script somewhat before using it**
 
@@ -39,6 +48,7 @@ If IP has changed since last check, an action is performed - once again as defin
 Details of the different settings in pippy.*.json and how they work:
 
 **server**
+
 `string: URI including 'http' OR an IP address`
 
 If `server` starts with `'http'` pippy will try to get external IP from is an external web page. 
@@ -48,24 +58,28 @@ If `server` does not start with `'http'` pippy will try to get external IP from 
 Assumption is that the setting is a local IP that points to a SSH enabled router from which to get the external IP from.
 
 **action**
+
 `int: SSH port to router`
 
 Port to use for SSH connection (usually 22)
 Only relevant if `server` is a router with SSH.
 
 **user**
+
 `string: username for SSH`
 
 The username for the admin of the router.
 Only relevant if `server` is a router with SSH.
 
 **password**
+
 `string: password for SSH`
 
 The password for the admin of the router.
 Only relevant if `server` is a router with SSH.
 
 **matchip**
+
 `string: regexp for IP match OR shell command(s) for getting IP`
 
 If `server`is a web page, pippy will use `matchip` as a regexp to parse the web page for external IP.
@@ -75,6 +89,7 @@ If `server`is a router with SSH, pippy will use `matchip` as a command (possibly
 Assumption is that `matchip` is a valid command or series of commands supported by the router using SSH connection.
 
 **action**
+
 `string: URI including 'http' OR a valid shell command`
 
 If `action` starts with `'http'` pippy will call the web page given by `action` as a result of a change of external IP.
@@ -84,13 +99,22 @@ If `action`does not start with `'http'` pippy will run the comand given by `acti
 Assumption is that `action` is whatever is needed to actually update the dyndns provider with a new external IP.
 In other words: he key component for actually updating a dyndns provider with new IP is NOT covered here. 
 
+Example: I use the excellent service of Free DNS (http://freedns.afraid.org/) and use their service to update my IP using pippy to the domain name they provide that I use.
+After setting up my account, I just login, click "Dynamic DNS" and get my personal link under appropriate section. It looks something like this (example, not a valid link!):
+
+`http://freedns.afraid.org/dynamic/update.php?abcdefg...`
+
+This is the string I use as action in pippy. It will update DNS to point to my new IP if pippy detects a change. 
+
 **logfile**
+
 `string: fully qualified path to logfile`
 
 pippy will write IP changes to this file.
 If file is missing it will be created, but missing directories is not handled and will cause error.
 
 **changeonly**
+
 `bool: if IP changes shall be logged only` 
 
 What to log: 
@@ -98,6 +122,7 @@ If `true`: only IP changes shall be logged in `logfile`
 If `false`: even checks with no change shall be logged in `logfile` (not recommended)
 
 **debug**
+
 `bool: if debug messages shall be printed
 
 What to print:
@@ -109,3 +134,8 @@ If `false`: don't print debug info (nothing will be printed part from logging to
 *  If your router does not support SSH, you're out of luck here. Or modify the script to parse an external page that will show IP.
 *  If you choose to log everything (settings file option 'changeonly' set to false), the log WILL grow. Use logrotate or something, or you will produce large logfiles with rather meaningless contents that will fill your disk.
 *  **IMPORTANT**: Use at own risk. No support, no guarantees. I made it to fit my purposes, you are free to make it yours but that's up to you. :)  
+  
+# THANKS
+Thanks to Free DNS for an excellent service and service minded attitude! I got inspired by the lastip2.php-script by Joshua Anderson there, to make pippy. I like the idea of not relying on an external web page to check external IP, which is the idea of lastip2.php. 
+However, since I failed to get that script to work with my router, I tried the SSH-variant instead, resulting in pippy. Ironically, I added support for external web page too, just for the fun of it. So pippy can get IP either from the router or an external page, but if you read this far you already know this :)
+
