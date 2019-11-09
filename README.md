@@ -39,6 +39,7 @@ If IP has changed since last check, an action is performed - once again as defin
 Details of the different settings in pippy.*.json and how they work:
 
 **server**
+
 `string: URI including 'http' OR an IP address`
 
 If `server` starts with `'http'` pippy will try to get external IP from is an external web page. 
@@ -48,24 +49,28 @@ If `server` does not start with `'http'` pippy will try to get external IP from 
 Assumption is that the setting is a local IP that points to a SSH enabled router from which to get the external IP from.
 
 **action**
+
 `int: SSH port to router`
 
 Port to use for SSH connection (usually 22)
 Only relevant if `server` is a router with SSH.
 
 **user**
+
 `string: username for SSH`
 
 The username for the admin of the router.
 Only relevant if `server` is a router with SSH.
 
 **password**
+
 `string: password for SSH`
 
 The password for the admin of the router.
 Only relevant if `server` is a router with SSH.
 
 **matchip**
+
 `string: regexp for IP match OR shell command(s) for getting IP`
 
 If `server`is a web page, pippy will use `matchip` as a regexp to parse the web page for external IP.
@@ -75,6 +80,7 @@ If `server`is a router with SSH, pippy will use `matchip` as a command (possibly
 Assumption is that `matchip` is a valid command or series of commands supported by the router using SSH connection.
 
 **action**
+
 `string: URI including 'http' OR a valid shell command`
 
 If `action` starts with `'http'` pippy will call the web page given by `action` as a result of a change of external IP.
@@ -85,12 +91,14 @@ Assumption is that `action` is whatever is needed to actually update the dyndns 
 In other words: he key component for actually updating a dyndns provider with new IP is NOT covered here. 
 
 **logfile**
+
 `string: fully qualified path to logfile`
 
 pippy will write IP changes to this file.
 If file is missing it will be created, but missing directories is not handled and will cause error.
 
 **changeonly**
+
 `bool: if IP changes shall be logged only` 
 
 What to log: 
@@ -98,6 +106,7 @@ If `true`: only IP changes shall be logged in `logfile`
 If `false`: even checks with no change shall be logged in `logfile` (not recommended)
 
 **debug**
+
 `bool: if debug messages shall be printed
 
 What to print:
