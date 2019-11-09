@@ -90,6 +90,9 @@ If `action`does not start with `'http'` pippy will run the comand given by `acti
 Assumption is that `action` is whatever is needed to actually update the dyndns provider with a new external IP.
 In other words: he key component for actually updating a dyndns provider with new IP is NOT covered here. 
 
+Example: I use Free DNS (http://freedns.afraid.org) and they provide personal URL (if you have account) that will update their records with a new IP.
+It looks something like this: http://freedns.afraid.org/dynamic/update.php?abcdef (just an example, non working I hope). This is what I use as action with pippy!
+
 **logfile**
 
 `string: fully qualified path to logfile`
