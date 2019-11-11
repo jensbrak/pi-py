@@ -36,11 +36,12 @@ Simple Python script to update external IP for dynamic dns but only when IP has 
 pippy is pretty basic: it will load settings from a json file and based on the settings use a provider to get external IP. 
 If IP has changed since last check, an action is performed - once again as defined in settings.
 
+# Settings (pippy.*.json)
 Details of the different settings in pippy.*.json and how they work:
 
-**server**
+`server: string:` 
 
-`string: URI including 'http' OR an IP address`
+*URI including 'http' OR an IP address*
 
 If `server` starts with `'http'` pippy will try to get external IP from is an external web page. 
 Assumption is that an IP is presented on that page representing external IP.
@@ -48,30 +49,30 @@ Assumption is that an IP is presented on that page representing external IP.
 If `server` does not start with `'http'` pippy will try to get external IP from a router. 
 Assumption is that the setting is a local IP that points to a SSH enabled router from which to get the external IP from.
 
-**action**
+`port: int`
 
-`int: SSH port to router`
+*SSH port used by router*
 
 Port to use for SSH connection (usually 22)
 Only relevant if `server` is a router with SSH.
 
-**user**
+`user: string` 
 
-`string: username for SSH`
+*Username for SSH*
 
 The username for the admin of the router.
 Only relevant if `server` is a router with SSH.
 
-**password**
+`password: string`
 
-`string: password for SSH`
+*Password for SSH*
 
 The password for the admin of the router.
 Only relevant if `server` is a router with SSH.
 
-**matchip**
+`matchip: string`
 
-`string: regexp for IP match OR shell command(s) for getting IP`
+*Regexp for IP match OR shell command(s) for getting IP*
 
 If `server`is a web page, pippy will use `matchip` as a regexp to parse the web page for external IP.
 Assumption is that `matchip` is a valid AND double quoted (double backslash) regexp.
@@ -79,9 +80,9 @@ Assumption is that `matchip` is a valid AND double quoted (double backslash) reg
 If `server`is a router with SSH, pippy will use `matchip` as a command (possibly using pipes) to ask router for external IP.
 Assumption is that `matchip` is a valid command or series of commands supported by the router using SSH connection.
 
-**action**
+`action: string`
 
-`string: URI including 'http' OR a valid shell command`
+*URI including 'http' OR a valid shell command*
 
 If `action` starts with `'http'` pippy will call the web page given by `action` as a result of a change of external IP.
 
@@ -90,27 +91,27 @@ If `action`does not start with `'http'` pippy will run the comand given by `acti
 Assumption is that `action` is whatever is needed to actually update the dyndns provider with a new external IP.
 In other words: he key component for actually updating a dyndns provider with new IP is NOT covered here. 
 
-Example: I use Free DNS (http://freedns.afraid.org) and they provide personal URL (if you have account) that will update their records with a new IP.
-It looks something like this: http://freedns.afraid.org/dynamic/update.php?abcdef (just an example, non working I hope). This is what I use as action with pippy!
+*Example: I use Free DNS (http://freedns.afraid.org) and they provide personal URL (if you have account) that will update their records with a new IP.
+It looks something like this: http://freedns.afraid.org/dynamic/update.php?abcdef (just an example, non working I hope). This is what I use as action with pippy!*
 
-**logfile**
+`logfile: string`
 
-`string: fully qualified path to logfile`
+*Fully qualified path to logfile*
 
 pippy will write IP changes to this file.
 If file is missing it will be created, but missing directories is not handled and will cause error.
 
-**changeonly**
+`changeonly: bool`
 
-`bool: if IP changes shall be logged only` 
+*If IP changes shall be logged only*
 
 What to log: 
 If `true`: only IP changes shall be logged in `logfile`
 If `false`: even checks with no change shall be logged in `logfile` (not recommended)
 
-**debug**
+`debug: bool` 
 
-`bool: if debug messages shall be printed
+*If debug messages shall be printed*
 
 What to print:
 If `true`: print debugg info to stdout (will not be printed in `logfile`)
