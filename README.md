@@ -23,8 +23,8 @@ Simple Python script to update external IP for dynamic dns but only when IP has 
 **NOTE: Make sure you understand the script somewhat before using it**
 
 1.  If missing - install the dependencies for pippy, 
-2.  Download pippy script and place it in a folder where it should be run (eg /usr/bin/, /usr/local/bin/ or ~/bin/)
-3.  Make sure pippy has proper permissions set (eg chmod 755 pippy) 
+2.  Download pippy.py script and place it in a folder where it should be run (eg /usr/bin/, /usr/local/bin/ or ~/bin/)
+3.  Make sure pippy has proper permissions set (eg chmod 755 pippy.py) 
 4.  Download pippy.router.json or pippy.externalpage.json (depnding on what kind of provider you choose to use) and place it in a folder of choice (eg /etc/ or ~/.pippy/) 
 5.  Edit selected .json file to suit your selected provider (see Desciption below for details)
 6.  Make sure the paths pointed out in .json file is accessable and directories exists (see Description below for details).
@@ -43,10 +43,10 @@ Details of the different settings in pippy.*.json and how they work:
 
 *URI including 'http' OR an IP address*
 
-If `server` starts with `'http'` pippy will try to get external IP from is an external web page. 
+If server starts with 'http' pippy will try to get external IP from is an external web page. 
 Assumption is that an IP is presented on that page representing external IP.
 
-If `server` does not start with `'http'` pippy will try to get external IP from a router. 
+If server does not start with 'http' pippy will try to get external IP from a router. 
 Assumption is that the setting is a local IP that points to a SSH enabled router from which to get the external IP from.
 
 `port: int`
@@ -54,41 +54,41 @@ Assumption is that the setting is a local IP that points to a SSH enabled router
 *SSH port used by router*
 
 Port to use for SSH connection (usually 22)
-Only relevant if `server` is a router with SSH.
+Only relevant if server is a router with SSH.
 
 `user: string` 
 
 *Username for SSH*
 
 The username for the admin of the router.
-Only relevant if `server` is a router with SSH.
+Only relevant if server is a router with SSH.
 
 `password: string`
 
 *Password for SSH*
 
 The password for the admin of the router.
-Only relevant if `server` is a router with SSH.
+Only relevant if server is a router with SSH.
 
 `matchip: string`
 
 *Regexp for IP match OR shell command(s) for getting IP*
 
-If `server`is a web page, pippy will use `matchip` as a regexp to parse the web page for external IP.
-Assumption is that `matchip` is a valid AND double quoted (double backslash) regexp.
+If server is a web page, pippy will use matchip as a regexp to parse the web page for external IP.
+Assumption is that matchip is a valid AND escaped (double backslash) regexp.
 
-If `server`is a router with SSH, pippy will use `matchip` as a command (possibly using pipes) to ask router for external IP.
-Assumption is that `matchip` is a valid command or series of commands supported by the router using SSH connection.
+If server is a router with SSH, pippy will use matchip as a command (possibly using pipes) to ask router for external IP.
+Assumption is that matchip is a valid command or series of commands supported by the router using SSH connection.
 
 `action: string`
 
 *URI including 'http' OR a valid shell command*
 
-If `action` starts with `'http'` pippy will call the web page given by `action` as a result of a change of external IP.
+If action starts with 'http' pippy will call the web page given by action as a result of a change of external IP.
 
-If `action`does not start with `'http'` pippy will run the comand given by `action` in a local shell as a result of a change of external IP.
+If action does not start with 'http' pippy will run the comand given by action in a local shell as a result of a change of external IP.
 
-Assumption is that `action` is whatever is needed to actually update the dyndns provider with a new external IP.
+Assumption is that action is whatever is needed to actually update the dyndns provider with a new external IP.
 In other words: he key component for actually updating a dyndns provider with new IP is NOT covered here. 
 
 *Example: I use Free DNS (http://freedns.afraid.org) and they provide personal URL (if you have account) that will update their records with a new IP.
@@ -106,16 +106,16 @@ If file is missing it will be created, but missing directories is not handled an
 *If IP changes shall be logged only*
 
 What to log: 
-If `true`: only IP changes shall be logged in `logfile`
-If `false`: even checks with no change shall be logged in `logfile` (not recommended)
+If true: only IP changes shall be logged in logfile
+If false: even checks with no change shall be logged in logfile (not recommended)
 
 `debug: bool` 
 
 *If debug messages shall be printed*
 
 What to print:
-If `true`: print debugg info to stdout (will not be printed in `logfile`)
-If `false`: don't print debug info (nothing will be printed part from logging to `logfile` or whatever `action` as console command will print)
+If true: print debugg info to stdout (will not be printed in logfile)
+If false: don't print debug info (nothing will be printed part from logging to logfile or whatever action as console command will print)
 
 # NOTES
 *  **IMPORTANT**: Make sure you ONLY use this in a settig where you can protect your router credentials. If pippy.json can be read by others, you will expose your router admin credentials.
