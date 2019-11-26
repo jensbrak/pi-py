@@ -1,8 +1,14 @@
-# pippy
+# PIP-Py
 
-**pippy: Public IP PYthon-script**
+**PIP-Py: Public IP PYthon-script**
 
-Simple Python script to update external IP for dynamic dns but only when IP has changed and only by checking router via SSH or using external web page.
+Simple Python script to update external IP for dynamic DNS - but only when IP has changed. 
+Primary IP check using SSH to router, alternative method using external web page provided too.
+
+# Platform
+
+Tested and used on Linux (Debian Buster), however Python runs on multiplatform so it is multiplatform since only dependency is Python with some Python libs.
+If you try this script on other platforms, let me know!
 
 # Dependencies
 
@@ -11,95 +17,95 @@ Simple Python script to update external IP for dynamic dns but only when IP has 
 1.  Python (https://www.python.org/)
 2.  Invoke (https://www.pyinvoke.org/) - needed by Fabric)
 3.  Paramiko (https://www.paramiko.org/) - needed by Fabric)
-4.  Fabric (http://www.fabfile.org/) - needed by pippy for SSH
+4.  Fabric (http://www.fabfile.org/) - needed by PIP-Py for SSH
   
 **Other dependendies**
 
-1.  A script or url for updating the external IP for the dynamic dns provider used
-2.  A router with SSH access enabled OR an external IP providing site
-3.  A linux system to run pippy from 
+1.  A script or URL for updating the external IP for the dynamic DNS provider used 
+2.  A router with SSH access enabled (alternatively an URL for a web page providing external IP information)
+3.  A (Linux) system to run PIP-Py from 
 
 # Installation
 **NOTE: Make sure you understand the script somewhat before using it**
 
-1.  If missing - install the dependencies for pippy, 
-2.  Download pippy.py script and place it in a folder where it should be run (eg /usr/bin/, /usr/local/bin/ or ~/bin/)
-3.  Make sure pippy has proper permissions set (eg chmod 755 pippy.py) 
-4.  Download pippy.router.json or pippy.externalpage.json (depnding on what kind of provider you choose to use) and place it in a folder of choice (eg /etc/ or ~/.pippy/) 
-5.  Edit selected .json file to suit your selected provider (see Desciption below for details)
-6.  Make sure the paths pointed out in .json file is accessable and directories exists (see Description below for details).
-7.  Make sure path pointed out in pippy for .json is accessible and directories exists (see Description below for details).
-8.  Test the script by calling it directly, until it works as desired (eg ./pippy) Hint: remove file "pippy.save" to simulate IP change
-9.  Add row to crontab to run the script as often as desired (see crontab on the web for instructions)
+1.  Dependencies: If missing - install the dependencies for PIP-Py 
+2.  Script: Download PIP-Py.py script (pippy.py) and place it in a folder where it should be run (eg /usr/bin/, /usr/local/bin/ or ~/bin/)
+3.  Script permissions: Make sure PIP-Py has proper permissions set (eg chmod 755 pippy.py) 
+4.  Settings selection: Download pippy.router.json or pippy.externalpage.json (deprnding on what kind of provider you choose to use) and place it in a folder of choice (eg /etc/ or ~/.PIP-Py/) 
+5.  Settings editing: Edit selected .json file to suit your selected provider (see Settings below for details)
+6.  Directory permissions: Make sure the paths pointed out in .json file is accessible and directories exists (see Settings below for details).
+7.  Script editing: Make sure path pointed out in pippy.py for settings file (pippy.*.json is accessible and directories exists (see Settings below for details).
+8.  Script testing: Test the script by calling it directly, until it works as desired (eg ./pippy) Hint: remove file "pippy.save" to simulate IP change
+9.  Script scheduling: Add row to crontab to run the script as often as desired (see crontab on the web for instructions)
 
 # Description
-pippy is pretty basic: it will load settings from a json file and based on the settings use a provider to get external IP. 
+PIP-Py is pretty basic: it will load settings from a json file and based on the settings use a provider to get external IP. 
 If IP has changed since last check, an action is performed - once again as defined in settings.
+Two versions of the settings file is provided, one if using the script as indended by checking router, and another one if external page is used. 
+See them as examples of the two approaches, you still need to edit and understand them. :)
+Basic logging is provided using a log file. Debug logging also provided. (See Settings below for details)
 
 # Settings (pippy.*.json)
-Details of the different settings in pippy.*.json and how they work:
+Details of the different settings in pippy.*.json and how they work below.
+Note: pippy.*.json denote either pippy.router.json or pippy.externalpage.json and should either be renamed to pippy.json or referenced by actual name in pippy.py
 
-`server: string:` 
+`server: string:`
 
 *URI including 'http' OR an IP address*
 
-If server starts with 'http' pippy will try to get external IP from is an external web page. 
-Assumption is that an IP is presented on that page representing external IP.
+If 'server' starts with "http" PIP-Py will assume it represents a working address to a web page that prints the external IP.
 
-If server does not start with 'http' pippy will try to get external IP from a router. 
-Assumption is that the setting is a local IP that points to a SSH enabled router from which to get the external IP from.
+If 'server' does not start with "http" PIP-Py will assume it represents a valid internal IP to a router with SSH access enabled.
 
 `port: int`
 
 *SSH port used by router*
 
-Port to use for SSH connection (usually 22)
-Only relevant if server is a router with SSH.
+Only relevant if 'server' represents IP to a router with SSH.
 
-`user: string` 
+`user: string`
 
-*Username for SSH*
+*Username for SSH admin*
 
-The username for the admin of the router.
-Only relevant if server is a router with SSH.
+Only relevant if 'server' represents IP to a router with SSH.
 
 `password: string`
 
-*Password for SSH*
+*Password for SSH admin*
 
-The password for the admin of the router.
-Only relevant if server is a router with SSH.
+Only relevant if 'server' represents IP to a router with SSH.
 
 `matchip: string`
 
 *Regexp for IP match OR shell command(s) for getting IP*
 
-If server is a web page, pippy will use matchip as a regexp to parse the web page for external IP.
-Assumption is that matchip is a valid AND escaped (double backslash) regexp.
+If 'server' represents IP to arouter with SSH, PIP-Py will use 'matchip' as a command (possibly using pipes) to ask router for external IP.
 
-If server is a router with SSH, pippy will use matchip as a command (possibly using pipes) to ask router for external IP.
-Assumption is that matchip is a valid command or series of commands supported by the router using SSH connection.
+If 'server' represents an adress to a web page, PIP-Py will use 'matchip' as a regexp to parse the web page for external IP.
+Note: regexp needs to have double backslash.
 
 `action: string`
 
 *URI including 'http' OR a valid shell command*
 
-If action starts with 'http' pippy will call the web page given by action as a result of a change of external IP.
+The action to use in order to update dyndns provider with new IP.
 
-If action does not start with 'http' pippy will run the comand given by action in a local shell as a result of a change of external IP.
+If 'action' starts with "http" PIP-Py will assume 'action' is a web page URI that will update dyndns provider with the new IP. 
 
-Assumption is that action is whatever is needed to actually update the dyndns provider with a new external IP.
-In other words: he key component for actually updating a dyndns provider with new IP is NOT covered here. 
+If 'action' does not start with "http" PIP-Py will assume 'action' is a script (with fully qualified path) that will update dyndns provider with the new IP.
+
+Note: The web page or script functionality is NOT covered here, but remain the core functionality of PIP-Py. The dyndns provider should have API or other means to update its records.
+PIP-Py only provide functionality to get external IP and calling the selected update method given by the dyndns provider.
 
 *Example: I use Free DNS (http://freedns.afraid.org) and they provide personal URL (if you have account) that will update their records with a new IP.
-It looks something like this: http://freedns.afraid.org/dynamic/update.php?abcdef (just an example, non working I hope). This is what I use as action with pippy!*
+It looks something like this: http://freedns.afraid.org/dynamic/update.php?abcdef (just an example, non working I hope). This is what I use as action with PIP-Py!*
 
 `logfile: string`
 
 *Fully qualified path to logfile*
 
-pippy will write IP changes to this file.
-If file is missing it will be created, but missing directories is not handled and will cause error.
+PIP-Py will write IP changes to this file.
+If file is missing it will be created, but missing directories or failed access is not handled and will cause error.
 
 `changeonly: bool`
 
@@ -118,7 +124,11 @@ If true: print debugg info to stdout (will not be printed in logfile)
 If false: don't print debug info (nothing will be printed part from logging to logfile or whatever action as console command will print)
 
 # NOTES
-*  **IMPORTANT**: Make sure you ONLY use this in a settig where you can protect your router credentials. If pippy.json can be read by others, you will expose your router admin credentials.
-*  If your router does not support SSH, you're out of luck here. Or modify the script to parse an external page that will show IP.
+
+*  **IMPORTANT**: Use at own risk. I made it to fit my purposes but made it available so that you can make it fit yours.  
+*  **IMPORTANT**: Make sure you ONLY use this in a settig where you can protect your router credentials. If PIP-Py.json can be read by others, you will expose your router admin credentials.
+*  If your router does not support SSH, you can use PIP-Py with the external web page support. However, there may be other options to consider if that's the case. Main purpose with PIP-Py is to use SSH to router.
 *  If you choose to log everything (settings file option 'changeonly' set to false), the log WILL grow. Use logrotate or something, or you will produce large logfiles with rather meaningless contents that will fill your disk.
-*  **IMPORTANT**: Use at own risk. No support, no guarantees. I made it to fit my purposes, you are free to make it yours but that's up to you. :)  
+*  I encourage (and appreciate) you to let me know you have use for this script, especially if you adopt it to other platforms or in anyway enhance it. Pull requests are most welcome too!
+*  While I can't guarantee to provide any support using the script, you are welcome to contact me with if you have questions or thoughts.
+  
