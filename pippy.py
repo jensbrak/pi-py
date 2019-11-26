@@ -48,7 +48,7 @@ def loadsettings():
 # ###	'txt'	- text to print
 # ###	'lvl'	- text representing loglevel, like 'DEBUG', 'INFO', etc 
 def info(txt, lvl=""):
-    msg = "[pip"
+    msg = "[pippy"
     if lvl != "":
         msg += " " + lvl
     msg += "] " + txt
@@ -165,7 +165,7 @@ def getipexternal():
         dbg("getipexternal: got result=" + str(code) + " and ip=" + ip)
         return ip
 
-# ### setipsaved(ip): save a given ÍP to file. If save file does not exist, 
+# ### setipsaved(ip): save a given P to file. If save file does not exist, 
 # ###	create it. Used to pickup result from previous check.
 # ###	'ip'	- the ip to save, as string
 def setipsaved(ip):
