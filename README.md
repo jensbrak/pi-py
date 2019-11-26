@@ -3,7 +3,7 @@
 **PIP-Py: Public IP PYthon-script**
 
 Simple Python script to update external IP for dynamic DNS - but only when IP has changed. 
-Primary IP check using SSH to router, alternative method using external web page provided too.
+Primary IP check using SSH to router. Alternative method also provided, using external web page of choice.
 
 # Platform
 
